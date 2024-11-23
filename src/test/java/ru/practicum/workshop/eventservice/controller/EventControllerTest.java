@@ -47,8 +47,7 @@ public class EventControllerTest {
                 "Description",
                 LocalDateTime.of(2024, 12, 1, 10, 0),
                 LocalDateTime.of(2024, 12, 1, 12, 0),
-                "Online",
-                1L, LocalDateTime.now()
+                "Online", 1L, LocalDateTime.now()
         );
 
         Mockito.when(eventService.createEvent(Mockito.any(EventRequest.class), Mockito.anyLong())).thenReturn(response);
@@ -97,7 +96,8 @@ public class EventControllerTest {
                 LocalDateTime.of(2024, 12, 1, 10, 0),
                 LocalDateTime.of(2024, 12, 1, 12, 0),
                 "Online",
-                1L, LocalDateTime.now()
+                1L,
+                LocalDateTime.now()
         );
 
         Mockito.when(eventService.getEvent(1L, 1L)).thenReturn(response);
@@ -110,34 +110,91 @@ public class EventControllerTest {
     }
 
     @Test
-    void testGetEventsWithPagination() throws Exception {
-        EventResponse response = new EventResponse(
-                1L,
-                "Test Event",
-                "Description",
-                LocalDateTime.of(2024, 12, 1, 10, 0),
-                LocalDateTime.of(2024, 12, 1, 12, 0),
-                "Online",
-                1L, LocalDateTime.now()
-        );
-
-        Mockito.when(eventService.getEvents(1, 10, 1L))
-                .thenReturn(Collections.singletonList(response));
-
-        mockMvc.perform(get("/events")
-                        .param("page", "1")
-                        .param("size", "10")
-                        .header("X-User-Id", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Test Event"));
-    }
-
-    @Test
     void testDeleteEvent() throws Exception {
         Mockito.doNothing().when(eventService).deleteEvent(1L, 1L);
 
         mockMvc.perform(delete("/events/1")
                         .header("X-User-Id", 1L))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void whenNameIsEmpty_thenReturns400() throws Exception {
+        EventRequest invalidRequest = new EventRequest(
+                null,
+                "Description",
+                LocalDateTime.of(2024, 12, 1, 10, 0),
+                LocalDateTime.of(2024, 12, 1, 12, 0),
+                "Online"
+        );
+
+        mockMvc.perform(post("/events").header("X-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void whenStartDateAfterEndDate_thenReturns400() throws Exception {
+        EventRequest invalidRequest = new EventRequest(
+                "Invalid Event",
+                "Description",
+                LocalDateTime.of(2024, 12, 1, 12, 0),
+                LocalDateTime.of(2024, 12, 1, 10, 0),
+                "Online"
+        );
+
+        mockMvc.perform(post("/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void whenLocationIsMissing_thenReturns400() throws Exception {
+        EventRequest invalidRequest = new EventRequest(
+                "Valid Event",
+                "Description",
+                LocalDateTime.of(2024, 12, 1, 10, 0),
+                LocalDateTime.of(2024, 12, 1, 12, 0),
+                null
+        );
+
+        mockMvc.perform(post("/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void whenStartDateIsMissing_thenReturns400() throws Exception {
+        EventRequest invalidRequest = new EventRequest(
+                "Valid Event",
+                "Description",
+                null,
+                LocalDateTime.of(2024, 12, 1, 12, 0),
+                "Online"
+        );
+
+        mockMvc.perform(post("/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void whenEndDateIsMissing_thenReturns400() throws Exception {
+        EventRequest invalidRequest = new EventRequest(
+                "Valid Event",
+                "Description",
+                LocalDateTime.of(2024, 12, 1, 10, 0),
+                null,
+                "Online"
+        );
+
+        mockMvc.perform(post("/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
     }
 }

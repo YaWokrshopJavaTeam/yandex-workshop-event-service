@@ -2,6 +2,8 @@ package ru.practicum.workshop.eventservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.practicum.workshop.eventservice.validation.ValidDateRange;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,7 +16,6 @@ import java.time.LocalDateTime;
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     @Column(name = "id")
     private Long id;
 
@@ -24,7 +25,7 @@ public class Event {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "created_date_time", nullable = false)
+    @Column(name = "created_date_time")
     private LocalDateTime createdDateTime;
 
     @Column(name = "start_date_time", nullable = false)
@@ -38,4 +39,8 @@ public class Event {
 
     @Column(name = "owner_id", nullable = false)
     public Long ownerId;
+
+    public Long getOwnerId(){
+        return ownerId;
+    }
 }

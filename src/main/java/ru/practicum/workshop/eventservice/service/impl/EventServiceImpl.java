@@ -4,20 +4,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.workshop.eventservice.dto.EventRequest;
 import ru.practicum.workshop.eventservice.dto.EventResponse;
 import ru.practicum.workshop.eventservice.error.ForbiddenException;
 import ru.practicum.workshop.eventservice.error.NotFoundException;
 import ru.practicum.workshop.eventservice.mapper.EventMapper;
-import ru.practicum.workshop.eventservice.model.Event;
 import ru.practicum.workshop.eventservice.repository.EventRepository;
 import ru.practicum.workshop.eventservice.service.EventService;
+import ru.practicum.workshop.eventservice.model.Event;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
@@ -26,7 +29,7 @@ public class EventServiceImpl implements EventService {
     public EventResponse createEvent(EventRequest request, Long requesterId) {
         Event event = eventMapper.toCreatingModel(request, requesterId);
         Event savedEvent = eventRepository.save(event);
-        return eventMapper.toDto(savedEvent);
+        return eventMapper.toDtoWithCreateDateTime(savedEvent);
     }
 
     @Override
@@ -38,35 +41,35 @@ public class EventServiceImpl implements EventService {
         }
         Event newEvent = eventMapper.updateEvent(request, event);
         Event updatedEvent = eventRepository.save(newEvent);
-        return eventMapper.toDto(updatedEvent);
+        return eventMapper.toDtoWithCreateDateTime(updatedEvent);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EventResponse getEvent(Long id, Long requesterId) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
-        EventResponse response = eventMapper.toDto(event);
         if (!event.getOwnerId().equals(requesterId)) {
-            response.setCreatedDateTime(null);
+            return eventMapper.toDtoWithoutCreateDateTime(event);
         }
-        return response;
+        return eventMapper.toDtoWithCreateDateTime(event);
     }
 
     @Override
-    public List<EventResponse> getEvents(int page, int size, Long requesterId) {
+    @Transactional(readOnly = true)
+    public List<EventResponse> getEvents(int page, int size, Long requesterId, Long ownerId) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdDateTime");
         PageRequest pageRequest = PageRequest.of(page, size, sort);
-        if (requesterId != null) {
-            return eventRepository.findByOwnerId(requesterId, pageRequest).stream()
-                    .map(eventMapper::toDto)
-                    .collect(Collectors.toList());
+        List<Event> events;
+        List<EventResponse> responses = new ArrayList<>();
+        if (ownerId != null) {
+            events = eventRepository.findByOwnerId(ownerId, pageRequest).getContent();
         } else {
-            return eventRepository.findAll(pageRequest).stream()
-                    .peek(event -> event.setCreatedDateTime(null))
-                    .map(eventMapper::toDto)
-                    .collect(Collectors.toList());
+            events = eventRepository.findAll(pageRequest).getContent();
         }
-
+        responses.addAll(getEventsWithCreateDateTime(events, requesterId));
+        responses.addAll(getEventsWithoutCreateDateTime(events, requesterId));
+        return responses;
     }
 
     @Override
@@ -77,5 +80,19 @@ public class EventServiceImpl implements EventService {
             throw new ForbiddenException("Not authorized to delete this event");
         }
         eventRepository.delete(event);
+    }
+
+    private List<EventResponse> getEventsWithCreateDateTime(List<Event> events, Long requesterId) {
+        return events.stream()
+                .filter(e -> e.getOwnerId().equals(requesterId))
+                .map(eventMapper::toDtoWithCreateDateTime)
+                .collect(Collectors.toList());
+    }
+
+    private List<EventResponse> getEventsWithoutCreateDateTime(List<Event> events, Long requesterId) {
+        return events.stream()
+                .filter(e -> !(e.getOwnerId().equals(requesterId)))
+                .map(eventMapper::toDtoWithoutCreateDateTime)
+                .collect(Collectors.toList());
     }
 }

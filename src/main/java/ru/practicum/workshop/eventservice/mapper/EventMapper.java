@@ -1,8 +1,6 @@
 package ru.practicum.workshop.eventservice.mapper;
 
 import org.mapstruct.*;
-import org.mapstruct.factory.Mappers;
-import org.springframework.context.annotation.Bean;
 import ru.practicum.workshop.eventservice.dto.EventRequest;
 import ru.practicum.workshop.eventservice.dto.EventResponse;
 import ru.practicum.workshop.eventservice.model.Event;
@@ -23,5 +21,8 @@ public interface EventMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Event updateEvent(EventRequest eventRequest, @MappingTarget Event event);
 
-    EventResponse toDto(Event event);
+    EventResponse toDtoWithCreateDateTime(Event event);
+
+    @Mapping(target = "createdDateTime", ignore = true)
+    EventResponse toDtoWithoutCreateDateTime(Event event);
 }
