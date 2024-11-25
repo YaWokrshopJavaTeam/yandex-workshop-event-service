@@ -9,11 +9,9 @@ import ru.practicum.workshop.eventservice.dto.NewOrgTeamMemberDto;
 import ru.practicum.workshop.eventservice.dto.PublicOrgTeamMemberDto;
 import ru.practicum.workshop.eventservice.dto.UpdateOrgTeamMemberDto;
 import ru.practicum.workshop.eventservice.error.ForbiddenException;
-import ru.practicum.workshop.eventservice.mapper.EventMapper;
 import ru.practicum.workshop.eventservice.mapper.OrgTeamMemberMapper;
 import ru.practicum.workshop.eventservice.model.Event;
 import ru.practicum.workshop.eventservice.model.OrgTeamMember;
-import ru.practicum.workshop.eventservice.repository.EventRepository;
 import ru.practicum.workshop.eventservice.repository.OrgTeamMemberRepository;
 import ru.practicum.workshop.eventservice.service.EventService;
 import ru.practicum.workshop.eventservice.service.OrgTeamMemberService;
@@ -27,10 +25,8 @@ public class OrgTeamMemberServiceImpl implements OrgTeamMemberService {
 
     private final EventService eventService;
 
-    private final EventRepository eventRepository;
     private final OrgTeamMemberRepository orgTeamMemberRepository;
 
-    private final EventMapper eventMapper;
     private final OrgTeamMemberMapper orgTeamMemberMapper;
 
     @Override

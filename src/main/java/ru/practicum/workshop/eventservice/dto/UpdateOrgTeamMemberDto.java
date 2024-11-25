@@ -8,21 +8,23 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.workshop.eventservice.model.OrgTeamMember;
 
+import static ru.practicum.workshop.eventservice.dto.constants.OrgTeamMemberDtoConstants.*;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateOrgTeamMemberDto {
 
-    @NotNull
-    @Positive
+    @NotNull(message = EVENT_ID_NOT_NULL_ERROR_MESSAGE)
+    @Positive(message = EVENT_ID_POSITIVE_ERROR_MESSAGE)
     private Long eventId;
 
-    @NotNull
-    @Positive
+    @NotNull(message = USER_ID_NOT_NULL_ERROR_MESSAGE)
+    @Positive(message = USER_ID_POSITIVE_ERROR_MESSAGE)
     private Long userId;
 
-    @NotNull
+    @NotNull(message = ROLE_NOT_NULL_ERROR_MESSAGE)
     private OrgTeamMember.Role role;
 
 }

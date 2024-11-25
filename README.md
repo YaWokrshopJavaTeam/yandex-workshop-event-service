@@ -1,6 +1,8 @@
 ## Event Service
 
 ### Endpoints
+
+События:
 - `POST /events` - создание события
 - `PATCH /events/{eventId}` - обновление события по `id` (по header убеждаемся, что запрос делает создатель, нельзя обновить `createdDateTime` и `ownerId`)
 - `GET /events/{eventId}` - получение события по `id` (если запрашивает создатель, то вернуть с полем `createdDateTime`, иначе без него)
@@ -8,13 +10,26 @@
 - `DELETE /events/{eventId}` - удаление события по `id` (удалить может только создатель, проверяем по header)
 - `POST /events/orgs` - добавить пользователя в группу организаторов
 
+Команды организаторов:
+- `POST /events/orgs` - добавление пользователя в команду организаторов
+- `PATCH /events/orgs` - обновление данных члена команды организаторов  
+- `POST /events/orgs?eventId={eventId}&userId={userId}` - удаление пользователя из команды организаторов
+- `POST /events/orgs/{eventId}` - получение всех пользоватей команды организаторов события
 
-### Models
-Модель `Event` включает следующие поля: 
-- name
-- description
-- createdDateTime
-- startDateTime
-- endDateTime
-- location
-- ownerId
+### Модели данных
+
+`Event` 
+- `id`
+- `name`
+- `description`
+- `createdDateTime`
+- `startDateTime`
+- `endDateTime`
+- `location`
+- `ownerId`
+
+`OrgTeamMember`
+- `id`
+- `eventId`
+- `userId`
+- `role` (`EXECUTOR`, `MANAGER`)
