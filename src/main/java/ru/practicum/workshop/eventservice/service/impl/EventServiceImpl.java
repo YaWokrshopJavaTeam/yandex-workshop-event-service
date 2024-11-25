@@ -1,5 +1,6 @@
 package ru.practicum.workshop.eventservice.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -94,5 +95,12 @@ public class EventServiceImpl implements EventService {
                 .filter(e -> !(e.getOwnerId().equals(requesterId)))
                 .map(eventMapper::toDtoWithoutCreateDateTime)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Event getEventInternal(Long eventId) {
+        return eventRepository.findById(eventId).orElseThrow(
+                () -> new EntityNotFoundException(String.format("Event with id=%d not found.", eventId)));
     }
 }

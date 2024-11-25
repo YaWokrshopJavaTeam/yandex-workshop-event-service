@@ -2,9 +2,9 @@ package ru.practicum.workshop.eventservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ru.practicum.workshop.eventservice.validation.ValidDateRange;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "events")
@@ -38,7 +38,10 @@ public class Event {
     private String location;
 
     @Column(name = "owner_id", nullable = false)
-    public Long ownerId;
+    private Long ownerId;
+
+    @OneToMany(mappedBy = "event")
+    private List<OrgTeamMember> organizingTeam;
 
     public Long getOwnerId(){
         return ownerId;
