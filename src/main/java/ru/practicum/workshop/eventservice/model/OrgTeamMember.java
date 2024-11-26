@@ -24,6 +24,7 @@ public class OrgTeamMember {
 
     @ManyToOne
     @JoinColumn(name = "event_id")
+    @ToString.Exclude
     private Event event;
 
     @Column(name = "user_id")
@@ -32,6 +33,11 @@ public class OrgTeamMember {
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
+
+    @ToString.Include(name = "eventId")
+    private Long getEventId() {
+        return event != null ? event.getId() : null;
+    }
 
 }
 

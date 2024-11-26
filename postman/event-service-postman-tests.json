@@ -1,0 +1,3937 @@
+{
+	"info": {
+		"_postman_id": "58410d58-cfa7-4251-8f5b-f87c26bb496d",
+		"name": "Event Service Tests",
+		"description": "Integration tests for the Event Service API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24536323"
+	},
+	"item": [
+		{
+			"name": "Events",
+			"item": [
+				{
+					"name": "Create Event",
+					"item": [
+						{
+							"name": "Create Event",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.variables.set(\"ownerId\", Utils.getNextUserId());\r",
+											"pm.variables.set(\"newEventDto\", JSON.stringify(Utils.generateNewEventDto()));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has body\", function () {\r",
+											"    pm.response.to.have.body();\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response contains required fields\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const newEventDto = JSON.parse(pm.variables.get(\"newEventDto\"));\r",
+											"    const ownerId = pm.variables.get(\"ownerId\");\r",
+											"\r",
+											"    pm.expect(jsonData).to.have.property(\"id\");\r",
+											"    pm.expect(jsonData).to.have.property(\"name\", newEventDto.name);\r",
+											"    pm.expect(jsonData).to.have.property(\"startDateTime\", newEventDto.startDateTime);\r",
+											"    pm.expect(jsonData).to.have.property(\"endDateTime\", newEventDto.endDateTime);\r",
+											"    pm.expect(jsonData).to.have.property(\"location\", newEventDto.location);\r",
+											"    pm.expect(jsonData).to.have.property(\"ownerId\", ownerId);\r",
+											"    pm.expect(jsonData).to.have.property(\"createdDateTime\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newEventDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Org Teams",
+			"item": [
+				{
+					"name": "Add Team Member",
+					"item": [
+						{
+							"name": "Add member by event owner",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has body\", function () {\r",
+											"    pm.response.to.have.body();\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response contains required fields\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const newOrgTeamMemberDto = JSON.parse(pm.variables.get(\"newOrgTeamMemberDto\"));\r",
+											"\r",
+											"    pm.expect(jsonData).to.have.property(\"userId\", newOrgTeamMemberDto.userId);\r",
+											"    pm.expect(jsonData).to.have.property(\"role\", newOrgTeamMemberDto.role);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        let eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        let eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, Utils.getNextUserId(), \"EXECUTOR\");\r",
+											"\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add member by event manager",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has body\", function () {\r",
+											"    pm.response.to.have.body();\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response contains required fields\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const newOrgTeamMemberDto = JSON.parse(pm.variables.get(\"newOrgTeamMemberDto\"));\r",
+											"\r",
+											"    pm.expect(jsonData).to.have.property(\"userId\", newOrgTeamMemberDto.userId);\r",
+											"    pm.expect(jsonData).to.have.property(\"role\", newOrgTeamMemberDto.role);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const managerId = Utils.getNextUserId();\r",
+											"        const newOrgTeamManagerDto = Utils.getNewOrgTeamMemberDto(eventId, managerId, \"MANAGER\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamManagerDto);\r",
+											"\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, Utils.getNextUserId(), \"EXECUTOR\");\r",
+											"\r",
+											"        pm.variables.set(\"managerId\", managerId);\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{managerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add member by event executor",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 403\", function () {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, Utils.getNextUserId(), \"EXECUTOR\");\r",
+											"\r",
+											"        pm.variables.set(\"executorId\", executorId);\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{executorId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add owner as member",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 403\", function () {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        let eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        let eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, ownerId, \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add existing member",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 409\", function () {\r",
+											"    pm.response.to.have.status(409);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamMemberDto);\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add member to not exists event",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        let eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        let eventData = eventResponse.json();\r",
+											"\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"        const eventId = eventData.id;\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId + 1, Utils.getNextUserId(), \"EXECUTOR\");\r",
+											"\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add member by user with no id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{userId}}",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add member by user with invalid id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"\r",
+											"        const userId = 0;\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        pm.variables.set(\"userId\", userId);\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{userId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add member by user not in org team",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 403\", function () {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const managerId = Utils.getNextUserId();\r",
+											"        const newOrgTeamManagerDto = Utils.getNewOrgTeamMemberDto(eventId, managerId, \"MANAGER\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamManagerDto);\r",
+											"\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, Utils.getNextUserId(), \"EXECUTOR\");\r",
+											"\r",
+											"        const imposterId = Utils.getNextUserId();\r",
+											"\r",
+											"        pm.variables.set(\"imposterId\", imposterId);\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{imposterId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add member to event without id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        let eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        let eventData = eventResponse.json();\r",
+											"\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(null, Utils.getNextUserId(), \"EXECUTOR\");\r",
+											"\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add member to event with invalid id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventId = 0;\r",
+											"        const ownerId = Utils.getNextUserId();\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, Utils.getNextUserId(), \"EXECUTOR\");\r",
+											"\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add member without id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        let eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        let eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, null, \"EXECUTOR\");\r",
+											"\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add member with invalid id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        let eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        let eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, 0, \"EXECUTOR\");\r",
+											"\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add member without role",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        let eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        let eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, Utils.getNextUserId(), null);\r",
+											"\r",
+											"        pm.variables.set(\"newOrgTeamMemberDto\", JSON.stringify(newOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{newOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Update Team Member Data",
+					"item": [
+						{
+							"name": "Update member by event owner",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has body\", function () {\r",
+											"    pm.response.to.have.body();\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response contains required fields\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const updateOrgTeamMemberDto = JSON.parse(pm.variables.get(\"updateOrgTeamMemberDto\"));\r",
+											"\r",
+											"    pm.expect(jsonData).to.have.property(\"userId\", updateOrgTeamMemberDto.userId);\r",
+											"    pm.expect(jsonData).to.have.property(\"role\", updateOrgTeamMemberDto.role);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const updateOrgTeamMemberDto = Utils.getUpdateOrgTeamMemberDto(eventId, executorId, \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"updateOrgTeamMemberDto\", JSON.stringify(updateOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{updateOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update member by event manager",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has body\", function () {\r",
+											"    pm.response.to.have.body();\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response contains required fields\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    const updateOrgTeamMemberDto = JSON.parse(pm.variables.get(\"updateOrgTeamMemberDto\"));\r",
+											"\r",
+											"    pm.expect(jsonData).to.have.property(\"userId\", updateOrgTeamMemberDto.userId);\r",
+											"    pm.expect(jsonData).to.have.property(\"role\", updateOrgTeamMemberDto.role);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const managerId = Utils.getNextUserId();\r",
+											"        const newOrgTeamManagerDto = Utils.getNewOrgTeamMemberDto(eventId, managerId, \"MANAGER\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamManagerDto);\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamMemberDto);\r",
+											"\r",
+											"        const updateOrgTeamMemberDto = Utils.getUpdateOrgTeamMemberDto(eventId, userId, \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"managerId\", managerId);\r",
+											"        pm.variables.set(\"updateOrgTeamMemberDto\", JSON.stringify(updateOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{managerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{updateOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update member by event executor",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 403\", function () {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamMemberDto);\r",
+											"\r",
+											"        const updateOrgTeamMemberDto = Utils.getUpdateOrgTeamMemberDto(eventId, userId, \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"executorId\", executorId);\r",
+											"        pm.variables.set(\"updateOrgTeamMemberDto\", JSON.stringify(updateOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{executorId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{updateOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update not exists member",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const updateOrgTeamMemberDto = Utils.getUpdateOrgTeamMemberDto(eventId, Utils.getNextUserId(), \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"updateOrgTeamMemberDto\", JSON.stringify(updateOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{updateOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update member of not exists event",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const updateOrgTeamMemberDto = Utils.getUpdateOrgTeamMemberDto(eventId + 1, executorId, \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"updateOrgTeamMemberDto\", JSON.stringify(updateOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{updateOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update member by user with no id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const updateOrgTeamMemberDto = Utils.getUpdateOrgTeamMemberDto(eventId, executorId, \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"updateOrgTeamMemberDto\", JSON.stringify(updateOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{updateOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update member by user with incorrect id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const updateOrgTeamMemberDto = Utils.getUpdateOrgTeamMemberDto(eventId, executorId, \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", 0);\r",
+											"        pm.variables.set(\"updateOrgTeamMemberDto\", JSON.stringify(updateOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{updateOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update member without event id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const updateOrgTeamMemberDto = Utils.getUpdateOrgTeamMemberDto(null, executorId, \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"updateOrgTeamMemberDto\", JSON.stringify(updateOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{updateOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update member with invalid event id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const updateOrgTeamMemberDto = Utils.getUpdateOrgTeamMemberDto(0, executorId, \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"updateOrgTeamMemberDto\", JSON.stringify(updateOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{updateOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update member without id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const updateOrgTeamMemberDto = Utils.getUpdateOrgTeamMemberDto(eventId, null, \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"updateOrgTeamMemberDto\", JSON.stringify(updateOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{updateOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update member with invalid id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const updateOrgTeamMemberDto = Utils.getUpdateOrgTeamMemberDto(eventId, 0, \"MANAGER\");\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"updateOrgTeamMemberDto\", JSON.stringify(updateOrgTeamMemberDto));\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{{updateOrgTeamMemberDto}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Delete Team Member",
+					"item": [
+						{
+							"name": "Delete member by event owner",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 204\", function () {\r",
+											"    pm.response.to.have.status(204);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"eventId\", eventId);\r",
+											"        pm.variables.set(\"userId\", executorId);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									],
+									"query": [
+										{
+											"key": "eventId",
+											"value": "{{eventId}}"
+										},
+										{
+											"key": "userId",
+											"value": "{{userId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete member by event manager",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 204\", function () {\r",
+											"    pm.response.to.have.status(204);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const managerId = Utils.getNextUserId();\r",
+											"        const newOrgTeamManagerDto = Utils.getNewOrgTeamMemberDto(eventId, managerId, \"MANAGER\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamManagerDto);\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamMemberDto);\r",
+											"\r",
+											"        pm.variables.set(\"managerId\", managerId);\r",
+											"        pm.variables.set(\"eventId\", eventId);\r",
+											"        pm.variables.set(\"userId\", userId);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{managerId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									],
+									"query": [
+										{
+											"key": "eventId",
+											"value": "{{eventId}}"
+										},
+										{
+											"key": "userId",
+											"value": "{{userId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete member by event executor",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 403\", function () {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamMemberDto);\r",
+											"\r",
+											"        pm.variables.set(\"executorId\", executorId);\r",
+											"        pm.variables.set(\"eventId\", eventId);\r",
+											"        pm.variables.set(\"userId\", userId);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{executorId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									],
+									"query": [
+										{
+											"key": "eventId",
+											"value": "{{eventId}}"
+										},
+										{
+											"key": "userId",
+											"value": "{{userId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete not exists member",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const executorId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, executorId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"eventId\", eventId);\r",
+											"        pm.variables.set(\"userId\", Utils.getNextUserId());\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									],
+									"query": [
+										{
+											"key": "eventId",
+											"value": "{{eventId}}"
+										},
+										{
+											"key": "userId",
+											"value": "{{userId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete member from not exists event",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamExecutorDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamExecutorDto);\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"eventId\", eventId + 1);\r",
+											"        pm.variables.set(\"userId\", userId);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									],
+									"query": [
+										{
+											"key": "eventId",
+											"value": "{{eventId}}"
+										},
+										{
+											"key": "userId",
+											"value": "{{userId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete member by user with no id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamMemberDto);\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"eventId\", eventId);\r",
+											"        pm.variables.set(\"userId\", userId);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									],
+									"query": [
+										{
+											"key": "eventId",
+											"value": "{{eventId}}"
+										},
+										{
+											"key": "userId",
+											"value": "{{userId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete member by user with invalid id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamMemberDto);\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", 0);\r",
+											"        pm.variables.set(\"eventId\", eventId);\r",
+											"        pm.variables.set(\"userId\", userId);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									],
+									"query": [
+										{
+											"key": "eventId",
+											"value": "{{eventId}}"
+										},
+										{
+											"key": "userId",
+											"value": "{{userId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete member with no id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamMemberDto);\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"eventId\", eventId);\r",
+											"        pm.variables.set(\"userId\", userId);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									],
+									"query": [
+										{
+											"key": "eventId",
+											"value": "{{eventId}}"
+										},
+										{
+											"key": "userId",
+											"value": "{{userId}}",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete member with incorrect id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamMemberDto);\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"eventId\", eventId);\r",
+											"        pm.variables.set(\"userId\", 0);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									],
+									"query": [
+										{
+											"key": "eventId",
+											"value": "{{eventId}}"
+										},
+										{
+											"key": "userId",
+											"value": "{{userId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete member for event with no id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamMemberDto);\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"eventId\", eventId);\r",
+											"        pm.variables.set(\"userId\", userId);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs?userId={{userId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									],
+									"query": [
+										{
+											"key": "eventId",
+											"value": "{{eventId}}",
+											"disabled": true
+										},
+										{
+											"key": "userId",
+											"value": "{{userId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete member for event with incorrect id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const userId = Utils.getNextUserId();\r",
+											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamMemberDto);\r",
+											"\r",
+											"        pm.variables.set(\"ownerId\", ownerId);\r",
+											"        pm.variables.set(\"eventId\", 0);\r",
+											"        pm.variables.set(\"userId\", userId);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs"
+									],
+									"query": [
+										{
+											"key": "eventId",
+											"value": "{{eventId}}"
+										},
+										{
+											"key": "userId",
+											"value": "{{userId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Get Team Members",
+					"item": [
+						{
+							"name": "Get team for event",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response contains 2 elements\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.be.an(\"array\");\r",
+											"    pm.expect(jsonData).to.have.lengthOf(2);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const user1Id = Utils.getNextUserId();\r",
+											"        const newOrgTeamUser1Dto = Utils.getNewOrgTeamMemberDto(eventId, user1Id, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamUser1Dto);\r",
+											"\r",
+											"        const user2Id = Utils.getNextUserId();\r",
+											"        const newOrgTeamUser2Dto = Utils.getNewOrgTeamMemberDto(eventId, user2Id, \"MANAGER\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamUser2Dto);\r",
+											"\r",
+											"        pm.variables.set(\"eventId\", eventId);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs/{{eventId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get team for not exists event",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const user1Id = Utils.getNextUserId();\r",
+											"        const newOrgTeamUser1Dto = Utils.getNewOrgTeamMemberDto(eventId, user1Id, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamUser1Dto);\r",
+											"\r",
+											"        const user2Id = Utils.getNextUserId();\r",
+											"        const newOrgTeamUser2Dto = Utils.getNewOrgTeamMemberDto(eventId, user2Id, \"MANAGER\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamUser2Dto);\r",
+											"\r",
+											"        pm.variables.set(\"eventId\", eventId + 1);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs/{{eventId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get team for event with incorrect id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Http status 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"(async () => {\r",
+											"    const api = new API(pm);\r",
+											"\r",
+											"    try {\r",
+											"        const eventResponse = await api.sendRequest(\"POST\", \r",
+											"                                                  \"/events\", \r",
+											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+											"                                                  Utils.generateNewEventDto());\r",
+											"\r",
+											"        const eventData = eventResponse.json();\r",
+											"\r",
+											"        const eventId = eventData.id;\r",
+											"        const ownerId = eventData.ownerId;\r",
+											"\r",
+											"        const user1Id = Utils.getNextUserId();\r",
+											"        const newOrgTeamUser1Dto = Utils.getNewOrgTeamMemberDto(eventId, user1Id, \"EXECUTOR\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamUser1Dto);\r",
+											"\r",
+											"        const user2Id = Utils.getNextUserId();\r",
+											"        const newOrgTeamUser2Dto = Utils.getNewOrgTeamMemberDto(eventId, user2Id, \"MANAGER\");\r",
+											"\r",
+											"        await api.sendRequest(\"POST\",\r",
+											"                              \"/events/orgs\",\r",
+											"                              [{key: 'X-User-Id', value: ownerId}],\r",
+											"                              newOrgTeamUser2Dto);\r",
+											"\r",
+											"        pm.variables.set(\"eventId\", 0);\r",
+											"    } catch (error) {\r",
+											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
+											"    }\r",
+											"})();\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-User-Id",
+										"value": "{{ownerId}}",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/events/orgs/{{eventId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"events",
+										"orgs",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Create Event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has ID\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).to.exist;",
+							"    pm.environment.set(\"eventId\", jsonData.id);",
+							"});",
+							"",
+							"pm.test(\"Owner is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.ownerId).to.eql(\"test-owner\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "ownerId",
+						"value": "test-owner"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test Event\",\n  \"description\": \"This is a test event\",\n  \"startDateTime\": \"2024-12-01T10:00:00\",\n  \"endDateTime\": \"2024-12-01T12:00:00\",\n  \"location\": \"Online\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/events",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Event by ID (Owner)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response contains createdDateTime\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.createdDateTime).to.exist;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "ownerId",
+						"value": "test-owner"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/events/{{eventId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"events",
+						"{{eventId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Event by ID (Other User)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response does NOT contain createdDateTime\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.createdDateTime).to.be.undefined;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "ownerId",
+						"value": "other-user"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/events/{{eventId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"events",
+						"{{eventId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response contains updated fields\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.name).to.eql(\"Updated Event Name\");",
+							"    pm.expect(jsonData.location).to.eql(\"Updated Location\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "ownerId",
+						"value": "test-owner"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Updated Event Name\",\n  \"location\": \"Updated Location\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/events/{{eventId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"events",
+						"{{eventId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Events with Pagination without UserID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is an array\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an(\"array\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/events?page=1&size=10",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"events"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "size",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Events with Pagination without UserID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is empty\", function () {",
+							"    pm.expect(pm.response.text()).to.be.empty;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "ownerId",
+						"value": "test-owner"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/events/{{eventId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"events",
+						"{{eventId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"API = class {\r",
+					"    constructor(postman) {\r",
+					"        this.pm = postman;\r",
+					"    }\r",
+					"\r",
+					"    async sendRequest(method, endpoint, headers = null, body=null) {\r",
+					"        return new Promise((resolve, reject) => {\r",
+					"            let request = {\r",
+					"                method: method,\r",
+					"                url: pm.collectionVariables.get(\"baseUrl\") + endpoint,\r",
+					"                header: [{key: \"Content-Type\", value: \"application/json\" }],\r",
+					"                body: body == null ? undefined : JSON.stringify(body) \r",
+					"            };\r",
+					"\r",
+					"            if (headers != null) {\r",
+					"                request.header =  [...request.header, ...headers ];\r",
+					"            }\r",
+					"\r",
+					"            console.log(request);\r",
+					"\r",
+					"            this.pm.sendRequest(request, (error, response) => {\r",
+					"                if (error) {\r",
+					"                    return reject(new Error(`Request failed: ${error}`));\r",
+					"                }\r",
+					"\r",
+					"                if (response.code >= 400 && response.code <= 599) {\r",
+					"                    let errorMessage = response.json ? JSON.stringify(response.json()) : response.text();\r",
+					"                    return reject(new Error(`Request failed with status code ${response.code}: ${errorMessage}`));\r",
+					"                }\r",
+					"\r",
+					"                resolve(response);\r",
+					"            });\r",
+					"        });\r",
+					"    }\r",
+					"}\r",
+					"\r",
+					"Utils = class {\r",
+					"    static getNextUserId() {\r",
+					"        const currentUserId = parseInt(pm.collectionVariables.get(\"nextUserId\"));\r",
+					"        pm.collectionVariables.set(\"nextUserId\", currentUserId + 1);\r",
+					"        return currentUserId;\r",
+					"    }\r",
+					"\r",
+					"    static getNextEventSuffix() {\r",
+					"        const currentEventSuffix = parseInt(pm.collectionVariables.get(\"nextEventSuffix\"));\r",
+					"        pm.collectionVariables.set(\"nextEventSuffix\", currentEventSuffix + 1);\r",
+					"        return currentEventSuffix;\r",
+					"    }\r",
+					"\r",
+					"    static getFormattedDate(date) {\r",
+					"        const year = date.getFullYear();\r",
+					"        const month = String(date.getMonth() + 1).padStart(2, '0');\r",
+					"        const day = String(date.getDate()).padStart(2, '0');\r",
+					"        const hours = String(date.getHours()).padStart(2, '0');\r",
+					"        const minutes = String(date.getMinutes()).padStart(2, '0');\r",
+					"        const seconds = String(date.getSeconds()).padStart(2, '0');\r",
+					"        const milliseconds = date.getMilliseconds();\r",
+					"\r",
+					"        let formattedDate = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;\r",
+					"\r",
+					"        return formattedDate;\r",
+					"    }\r",
+					"\r",
+					"    static generateNewEventDto() {\r",
+					"        const currentEventSuffix = Utils.getNextEventSuffix();\r",
+					"\r",
+					"        const now = new Date();\r",
+					"\r",
+					"        const newEventDto = {\r",
+					"            name: \"Event\" + currentEventSuffix,\r",
+					"            description: \"Description\" + currentEventSuffix,\r",
+					"            startDateTime: Utils.getFormattedDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2)),\r",
+					"            endDateTime: Utils.getFormattedDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3)),\r",
+					"            location: \"Location\" + currentEventSuffix\r",
+					"        };\r",
+					"\r",
+					"        return newEventDto;\r",
+					"    }\r",
+					"\r",
+					"    static getNewOrgTeamMemberDto(eventId, userId, role) {\r",
+					"        const newOrgTeamMemberDto = {\r",
+					"            eventId: eventId,\r",
+					"            userId: userId,\r",
+					"            role: role\r",
+					"        };\r",
+					"\r",
+					"        return newOrgTeamMemberDto;\r",
+					"    }\r",
+					"\r",
+					"    static getUpdateOrgTeamMemberDto(eventId, userId, role) {\r",
+					"        const updateOrgTeamMemberDto = {\r",
+					"            eventId: eventId,\r",
+					"            userId: userId,\r",
+					"            role: role\r",
+					"        };\r",
+					"\r",
+					"        return updateOrgTeamMemberDto;\r",
+					"    }\r",
+					"}\r",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "nextEventSuffix",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "nextUserId",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}

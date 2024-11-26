@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,4 +47,5 @@ public class Event {
     public Long getOwnerId(){
         return ownerId;
     }
+
 }

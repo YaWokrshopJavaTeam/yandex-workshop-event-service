@@ -36,6 +36,11 @@ public class OrgTeamMemberServiceImpl implements OrgTeamMemberService {
 
         checkRightsForOrgTeamModification(requesterId, event);
 
+        if (newOrgTeamMemberDto.getUserId().equals(event.getOwnerId())) {
+            throw new ForbiddenException(String.format("Can't change role for event(id=%d) owner(id=%d)",
+                    event.getId(), event.getOwnerId()));
+        }
+
         OrgTeamMember newOrgTeamMember = orgTeamMemberMapper.toOrgTeamMember(event, newOrgTeamMemberDto);
         orgTeamMemberRepository.save(newOrgTeamMember);
 

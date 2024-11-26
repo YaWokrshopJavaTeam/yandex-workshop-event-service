@@ -2,6 +2,7 @@ package ru.practicum.workshop.eventservice.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
@@ -30,6 +32,9 @@ public class EventServiceImpl implements EventService {
     public EventResponse createEvent(EventRequest request, Long requesterId) {
         Event event = eventMapper.toCreatingModel(request, requesterId);
         Event savedEvent = eventRepository.save(event);
+
+        log.info("Event created: {}", event);
+
         return eventMapper.toDtoWithCreateDateTime(savedEvent);
     }
 
