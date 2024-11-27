@@ -22,6 +22,7 @@ public class EventController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventResponse createEvent(@Valid @RequestBody EventRequest request,
                                      @RequestHeader("X-User-Id") Long requesterId) {
+        log.info("Request: create event by user(id={}), request={}", requesterId, request);
         return eventService.createEvent(request, requesterId);
     }
 
