@@ -15,7 +15,7 @@ import ru.practicum.workshop.eventservice.service.OrgTeamMemberService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/events/orgs")
+@RequestMapping("/events")
 @Validated
 @RequiredArgsConstructor
 @Slf4j
@@ -23,7 +23,7 @@ public class OrganizingTeamController {
 
     private final OrgTeamMemberService orgTeamMemberService;
 
-    @PostMapping
+    @PostMapping("/orgs")
     @ResponseStatus(HttpStatus.CREATED)
     public PublicOrgTeamMemberDto addTeamMember(@RequestHeader(name = "X-User-Id") @Positive Long requesterId,
                                                 @RequestBody @Valid NewOrgTeamMemberDto newOrgTeamMemberDto) {
@@ -31,7 +31,7 @@ public class OrganizingTeamController {
         return orgTeamMemberService.addTeamMember(requesterId, newOrgTeamMemberDto);
     }
 
-    @PatchMapping
+    @PatchMapping("/orgs")
     @ResponseStatus(HttpStatus.OK)
     public PublicOrgTeamMemberDto updateTeamMemberData(@RequestHeader(name = "X-User-Id") @Positive Long requesterId,
                                                        @RequestBody @Valid UpdateOrgTeamMemberDto updateOrgTeamMemberDto) {
@@ -40,17 +40,17 @@ public class OrganizingTeamController {
         return orgTeamMemberService.updateTeamMemberData(requesterId, updateOrgTeamMemberDto);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{eventId}/orgs/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTeamMember(@RequestHeader(name = "X-User-Id") @Positive Long requesterId,
-                                 @RequestParam(name = "eventId") @Positive Long eventId,
-                                 @RequestParam(name = "userId") @Positive Long userId) {
+                                 @PathVariable(name = "eventId") @Positive Long eventId,
+                                 @PathVariable(name = "userId") @Positive Long userId) {
         log.info("Request: delete team member, requester id={}, event id={}, user id={}",
                 requesterId, eventId, userId);
         orgTeamMemberService.deleteTeamMember(requesterId, eventId, userId);
     }
 
-    @GetMapping("/{eventId}")
+    @GetMapping("/orgs/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public List<PublicOrgTeamMemberDto> getTeamMembers(@PathVariable(name = "eventId") @Positive Long eventId) {
         log.info("Request: get all team members for event with id={}", eventId);

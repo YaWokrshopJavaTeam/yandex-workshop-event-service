@@ -268,67 +268,39 @@ public class OrganizingTeamControllerIntegrationTest {
     // Method "deleteTeamMember" tests.
     @Test
     public void deleteTeamMember_whenInputValid_thenDelete() throws Exception {
-        mockMvc.perform(delete("/events/orgs")
+        mockMvc.perform(delete("/events/{eventId}/orgs/{userId}", 1, 101)
                         .header("X-User-Id", 77)
-                        .param("eventId", "1")
-                        .param("userId", "101")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     public void deleteTeamMember_whenNoRequesterId_thenThrowException() throws Exception {
-        mockMvc.perform(delete("/events/orgs")
-                        .param("eventId", "1")
-                        .param("userId", "101")
+        mockMvc.perform(delete("/events/{eventId}/orgs/{userId}", 1, 101)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void deleteTeamMember_whenInvalidRequesterId_thenThrowException() throws Exception {
-        mockMvc.perform(delete("/events/orgs")
+        mockMvc.perform(delete("/events/{eventId}/orgs/{userId}", 1, 101)
                         .header("X-User-Id", 0)
-                        .param("eventId", "1")
-                        .param("userId", "101")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void deleteTeamMember_whenNoEventId_thenThrowException() throws Exception {
-        mockMvc.perform(delete("/events/orgs")
-                        .header("X-User-Id", 77)
-                        .param("userId", "101")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void deleteTeamMember_whenInvalidEventId_thenThrowException() throws Exception {
-        mockMvc.perform(delete("/events/orgs")
+        mockMvc.perform(delete("/events/{eventId}/orgs/{userId}", 0, 101)
                         .header("X-User-Id", 77)
-                        .param("eventId", "0")
-                        .param("userId", "101")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void deleteTeamMember_whenNoUserId_thenThrowException() throws Exception {
-        mockMvc.perform(delete("/events/orgs")
-                        .header("X-User-Id", 77)
-                        .param("eventId", "1")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void deleteTeamMember_whenInvalidUserId_thenThrowException() throws Exception {
-        mockMvc.perform(delete("/events/orgs")
+        mockMvc.perform(delete("/events/{eventId}/orgs/{userId}", 1, 0)
                         .header("X-User-Id", 77)
-                        .param("eventId", "1")
-                        .param("userId", "0")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }

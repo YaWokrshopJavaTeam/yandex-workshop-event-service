@@ -44,7 +44,6 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleForbidden(final ForbiddenException e) {
-        //log.error(e.getMessage(), e);
         log.error(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
