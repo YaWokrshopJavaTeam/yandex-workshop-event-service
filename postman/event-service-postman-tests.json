@@ -2333,23 +2333,15 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"raw": "{{baseUrl}}/events/{{eventId}}/orgs/{{userId}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"events",
-										"orgs"
-									],
-									"query": [
-										{
-											"key": "eventId",
-											"value": "{{eventId}}"
-										},
-										{
-											"key": "userId",
-											"value": "{{userId}}"
-										}
+										"{{eventId}}",
+										"orgs",
+										"{{userId}}"
 									]
 								}
 							},
@@ -2428,23 +2420,15 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"raw": "{{baseUrl}}/events/{{eventId}}/orgs/{{userId}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"events",
-										"orgs"
-									],
-									"query": [
-										{
-											"key": "eventId",
-											"value": "{{eventId}}"
-										},
-										{
-											"key": "userId",
-											"value": "{{userId}}"
-										}
+										"{{eventId}}",
+										"orgs",
+										"{{userId}}"
 									]
 								}
 							},
@@ -2523,23 +2507,15 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"raw": "{{baseUrl}}/events/{{eventId}}/orgs/{{userId}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"events",
-										"orgs"
-									],
-									"query": [
-										{
-											"key": "eventId",
-											"value": "{{eventId}}"
-										},
-										{
-											"key": "userId",
-											"value": "{{userId}}"
-										}
+										"{{eventId}}",
+										"orgs",
+										"{{userId}}"
 									]
 								}
 							},
@@ -2610,23 +2586,15 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"raw": "{{baseUrl}}/events/{{eventId}}/orgs/{{userId}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"events",
-										"orgs"
-									],
-									"query": [
-										{
-											"key": "eventId",
-											"value": "{{eventId}}"
-										},
-										{
-											"key": "userId",
-											"value": "{{userId}}"
-										}
+										"{{eventId}}",
+										"orgs",
+										"{{userId}}"
 									]
 								}
 							},
@@ -2697,23 +2665,15 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"raw": "{{baseUrl}}/events/{{eventId}}/orgs/{{userId}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"events",
-										"orgs"
-									],
-									"query": [
-										{
-											"key": "eventId",
-											"value": "{{eventId}}"
-										},
-										{
-											"key": "userId",
-											"value": "{{userId}}"
-										}
+										"{{eventId}}",
+										"orgs",
+										"{{userId}}"
 									]
 								}
 							},
@@ -2785,23 +2745,15 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"raw": "{{baseUrl}}/events/{{eventId}}/orgs/{{userId}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"events",
-										"orgs"
-									],
-									"query": [
-										{
-											"key": "eventId",
-											"value": "{{eventId}}"
-										},
-										{
-											"key": "userId",
-											"value": "{{userId}}"
-										}
+										"{{eventId}}",
+										"orgs",
+										"{{userId}}"
 									]
 								}
 							},
@@ -2872,111 +2824,15 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"raw": "{{baseUrl}}/events/{{eventId}}/orgs/{{userId}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"events",
-										"orgs"
-									],
-									"query": [
-										{
-											"key": "eventId",
-											"value": "{{eventId}}"
-										},
-										{
-											"key": "userId",
-											"value": "{{userId}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Delete member with no id",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Http status 400\", function () {\r",
-											"    pm.response.to.have.status(400);\r",
-											"});"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"(async () => {\r",
-											"    const api = new API(pm);\r",
-											"\r",
-											"    try {\r",
-											"        const eventResponse = await api.sendRequest(\"POST\", \r",
-											"                                                  \"/events\", \r",
-											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
-											"                                                  Utils.generateNewEventDto());\r",
-											"\r",
-											"        const eventData = eventResponse.json();\r",
-											"\r",
-											"        const eventId = eventData.id;\r",
-											"        const ownerId = eventData.ownerId;\r",
-											"\r",
-											"        const userId = Utils.getNextUserId();\r",
-											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
-											"\r",
-											"        await api.sendRequest(\"POST\",\r",
-											"                              \"/events/orgs\",\r",
-											"                              [{key: 'X-User-Id', value: ownerId}],\r",
-											"                              newOrgTeamMemberDto);\r",
-											"\r",
-											"        pm.variables.set(\"ownerId\", ownerId);\r",
-											"        pm.variables.set(\"eventId\", eventId);\r",
-											"        pm.variables.set(\"userId\", userId);\r",
-											"    } catch (error) {\r",
-											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
-											"    }\r",
-											"})();\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "X-User-Id",
-										"value": "{{ownerId}}",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"events",
-										"orgs"
-									],
-									"query": [
-										{
-											"key": "eventId",
-											"value": "{{eventId}}"
-										},
-										{
-											"key": "userId",
-											"value": "{{userId}}",
-											"disabled": true
-										}
+										"{{eventId}}",
+										"orgs",
+										"{{userId}}"
 									]
 								}
 							},
@@ -3047,111 +2903,15 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"raw": "{{baseUrl}}/events/{{eventId}}/orgs/{{userId}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"events",
-										"orgs"
-									],
-									"query": [
-										{
-											"key": "eventId",
-											"value": "{{eventId}}"
-										},
-										{
-											"key": "userId",
-											"value": "{{userId}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Delete member for event with no id",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Http status 400\", function () {\r",
-											"    pm.response.to.have.status(400);\r",
-											"});"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"(async () => {\r",
-											"    const api = new API(pm);\r",
-											"\r",
-											"    try {\r",
-											"        const eventResponse = await api.sendRequest(\"POST\", \r",
-											"                                                  \"/events\", \r",
-											"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
-											"                                                  Utils.generateNewEventDto());\r",
-											"\r",
-											"        const eventData = eventResponse.json();\r",
-											"\r",
-											"        const eventId = eventData.id;\r",
-											"        const ownerId = eventData.ownerId;\r",
-											"\r",
-											"        const userId = Utils.getNextUserId();\r",
-											"        const newOrgTeamMemberDto = Utils.getNewOrgTeamMemberDto(eventId, userId, \"EXECUTOR\");\r",
-											"\r",
-											"        await api.sendRequest(\"POST\",\r",
-											"                              \"/events/orgs\",\r",
-											"                              [{key: 'X-User-Id', value: ownerId}],\r",
-											"                              newOrgTeamMemberDto);\r",
-											"\r",
-											"        pm.variables.set(\"ownerId\", ownerId);\r",
-											"        pm.variables.set(\"eventId\", eventId);\r",
-											"        pm.variables.set(\"userId\", userId);\r",
-											"    } catch (error) {\r",
-											"        console.error(\"Error occurred during the pre-request script:\", error);\r",
-											"    }\r",
-											"})();\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "X-User-Id",
-										"value": "{{ownerId}}",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/events/orgs?userId={{userId}}",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"events",
-										"orgs"
-									],
-									"query": [
-										{
-											"key": "eventId",
-											"value": "{{eventId}}",
-											"disabled": true
-										},
-										{
-											"key": "userId",
-											"value": "{{userId}}"
-										}
+										"{{eventId}}",
+										"orgs",
+										"{{userId}}"
 									]
 								}
 							},
@@ -3222,23 +2982,15 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/events/orgs?eventId={{eventId}}&userId={{userId}}",
+									"raw": "{{baseUrl}}/events/{{eventId}}/orgs/{{userId}}",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"events",
-										"orgs"
-									],
-									"query": [
-										{
-											"key": "eventId",
-											"value": "{{eventId}}"
-										},
-										{
-											"key": "userId",
-											"value": "{{userId}}"
-										}
+										"{{eventId}}",
+										"orgs",
+										"{{userId}}"
 									]
 								}
 							},
