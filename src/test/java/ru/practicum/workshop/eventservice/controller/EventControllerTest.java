@@ -13,7 +13,6 @@ import ru.practicum.workshop.eventservice.dto.EventResponse;
 import ru.practicum.workshop.eventservice.service.EventService;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -33,11 +32,14 @@ public class EventControllerTest {
 
     @Test
     void testCreateEvent() throws Exception {
+        LocalDateTime startDateTime = LocalDateTime.now().plusHours(2);
+        LocalDateTime endDateTime = startDateTime.plusDays(2);
+
         EventRequest request = new EventRequest(
                 "Test Event",
                 "Description",
-                LocalDateTime.of(2024, 12, 1, 10, 0),
-                LocalDateTime.of(2024, 12, 1, 12, 0),
+                startDateTime,
+                endDateTime,
                 "Online"
         );
 
@@ -45,8 +47,8 @@ public class EventControllerTest {
                 1L,
                 "Test Event",
                 "Description",
-                LocalDateTime.of(2024, 12, 1, 10, 0),
-                LocalDateTime.of(2024, 12, 1, 12, 0),
+                startDateTime,
+                endDateTime,
                 "Online", 1L, LocalDateTime.now()
         );
 
@@ -63,18 +65,21 @@ public class EventControllerTest {
 
     @Test
     void testUpdateEvent() throws Exception {
+        LocalDateTime startDateTime = LocalDateTime.now().plusHours(2);
+        LocalDateTime endDateTime = startDateTime.plusDays(2);
+
         EventRequest updateRequest = new EventRequest(
                 "Updated Event",
                 "Updated Description",
-                LocalDateTime.of(2024, 12, 2, 10, 0),
-                LocalDateTime.of(2024, 12, 2, 12, 0),
+                startDateTime,
+                endDateTime,
                 "New Location"
         );
 
         EventResponse updateResponse = new EventResponse(1L, "Updated Event",
                 "Updated Description",
-                LocalDateTime.of(2024, 12, 2, 10, 0),
-                LocalDateTime.of(2024, 12, 2, 12, 0),
+                startDateTime,
+                endDateTime,
                 "New Location",1L, LocalDateTime.of(2024, 12, 2, 10, 0));
 
         Mockito.when(eventService.updateEvent(Mockito.anyLong(), Mockito.any(EventRequest.class), Mockito.anyLong()))

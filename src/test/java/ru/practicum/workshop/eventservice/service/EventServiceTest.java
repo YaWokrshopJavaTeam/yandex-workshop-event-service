@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@RequiredArgsConstructor(onConstructor_= @Autowired)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class EventServiceTest {
 
     private final EventService eventService;

@@ -43,9 +43,4 @@ public class Event {
 
     @OneToMany(mappedBy = "event")
     private List<OrgTeamMember> organizingTeam;
-
-    public Long getOwnerId(){
-        return ownerId;
-    }
-
 }

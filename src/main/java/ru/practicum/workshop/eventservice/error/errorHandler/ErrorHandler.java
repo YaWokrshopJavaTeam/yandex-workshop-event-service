@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.workshop.eventservice.error.ForbiddenException;
 import ru.practicum.workshop.eventservice.error.NotFoundException;
 import ru.practicum.workshop.eventservice.error.errorResponse.ErrorResponse;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestControllerAdvice
 @Slf4j
@@ -57,7 +61,7 @@ public class ErrorHandler {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse MissingServletRequestParameterException(final MissingServletRequestParameterException e) {
+    public ErrorResponse handleMissingServletRequestParameterException(final MissingServletRequestParameterException e) {
         log.error(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
@@ -66,7 +70,11 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNotValid(final MethodArgumentNotValidException e) {
         log.error(e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
+        List<String> details = new ArrayList<>();
+        for (ObjectError error : e.getBindingResult().getAllErrors()) {
+            details.add(error.getDefaultMessage());
+        }
+        return new ErrorResponse(details.get(0));
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, ValidationException.class})
