@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "58410d58-cfa7-4251-8f5b-f87c26bb496d",
+		"_postman_id": "cbca4edf-9b0c-4a06-bf51-a323c7b7d838",
 		"name": "Event Service Tests",
 		"description": "Integration tests for the Event Service API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "24536323"
+		"_exporter_id": "33433593"
 	},
 	"item": [
 		{
@@ -3273,9 +3273,11 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
 							"});",
+							"",
+							"const ownerId = pm.variables.get(\"ownerId\");",
 							"",
 							"pm.test(\"Response has ID\", function () {",
 							"    var jsonData = pm.response.json();",
@@ -3285,10 +3287,22 @@
 							"",
 							"pm.test(\"Owner is correct\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.ownerId).to.eql(\"test-owner\");",
+							"    pm.expect(jsonData.ownerId).to.eql(ownerId);",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.variables.set(\"ownerId\", Utils.getNextUserId());\r",
+							"pm.variables.set(\"newEventDto\", JSON.stringify(Utils.generateNewEventDto()));"
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -3300,13 +3314,13 @@
 						"value": "application/json"
 					},
 					{
-						"key": "ownerId",
-						"value": "test-owner"
+						"key": "X-User-Id",
+						"value": "{{ownerId}}"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"name\": \"Test Event\",\n  \"description\": \"This is a test event\",\n  \"startDateTime\": \"2024-12-01T10:00:00\",\n  \"endDateTime\": \"2024-12-01T12:00:00\",\n  \"location\": \"Online\"\n}"
+					"raw": "{{newEventDto}}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/events",
@@ -3336,7 +3350,48 @@
 							"    pm.expect(jsonData.createdDateTime).to.exist;",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const main = async () => {\r",
+							"    const api = new API(pm);\r",
+							"\r",
+							"    try {\r",
+							"        let eventResponse = await api.sendRequest(\"POST\", \r",
+							"                                                  \"/events\", \r",
+							"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+							"                                                  Utils.generateNewEventDto());\r",
+							"        let eventData = eventResponse.json();                                                  \r",
+							"        pm.variables.set('eventId', eventData.id);\r",
+							"        pm.variables.set(\"ownerId\", eventData.ownerId);\r",
+							"    } catch(err) {\r",
+							"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+							"    }\r",
+							"};\r",
+							"\r",
+							"const interval = setInterval(() => {}, 1000);\r",
+							"\r",
+							"setTimeout(async () => \r",
+							"    {\r",
+							"        try {\r",
+							"            // выполняем наш скрипт\r",
+							"            await main();\r",
+							"        } catch (e) {\r",
+							"            console.error(e);\r",
+							"        } finally {\r",
+							"            clearInterval(interval);\r",
+							"        }\r",
+							"    },  \r",
+							"    100 \r",
+							");"
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -3344,8 +3399,12 @@
 				"method": "GET",
 				"header": [
 					{
-						"key": "ownerId",
-						"value": "test-owner"
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-User-Id",
+						"value": "{{ownerId}}"
 					}
 				],
 				"url": {
@@ -3377,7 +3436,48 @@
 							"    pm.expect(jsonData.createdDateTime).to.be.undefined;",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const main = async () => {\r",
+							"    const api = new API(pm);\r",
+							"\r",
+							"    try {\r",
+							"        let eventResponse = await api.sendRequest(\"POST\", \r",
+							"                                                  \"/events\", \r",
+							"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+							"                                                  Utils.generateNewEventDto());\r",
+							"        let eventData = eventResponse.json();                                                  \r",
+							"        pm.variables.set('eventId', eventData.id);\r",
+							"        pm.variables.set(\"requesterId\", _.random(10000, 10500));\r",
+							"    } catch(err) {\r",
+							"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+							"    }\r",
+							"};\r",
+							"\r",
+							"const interval = setInterval(() => {}, 1000);\r",
+							"\r",
+							"setTimeout(async () => \r",
+							"    {\r",
+							"        try {\r",
+							"            // выполняем наш скрипт\r",
+							"            await main();\r",
+							"        } catch (e) {\r",
+							"            console.error(e);\r",
+							"        } finally {\r",
+							"            clearInterval(interval);\r",
+							"        }\r",
+							"    },  \r",
+							"    100 \r",
+							");"
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -3385,8 +3485,12 @@
 				"method": "GET",
 				"header": [
 					{
-						"key": "ownerId",
-						"value": "other-user"
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-User-Id",
+						"value": "{{requesterId}}"
 					}
 				],
 				"url": {
@@ -3413,13 +3517,72 @@
 							"    pm.response.to.have.status(200);",
 							"});",
 							"",
+							"const response = pm.collectionVariables.get('response');",
+							"const source = pm.variables.get('request_body');",
+							"const target = pm.response.json();",
+							"",
 							"pm.test(\"Response contains updated fields\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.name).to.eql(\"Updated Event Name\");",
-							"    pm.expect(jsonData.location).to.eql(\"Updated Location\");",
+							"    pm.expect(source.name).equal(target.name, 'Название мероприятия должно соответствовать данным в запросе');",
+							"    pm.expect(source.location).equal(target.location, 'Локация мероприятия должна соответствовать данным в запросе');",
+							"    pm.expect(source.description).equal(target.description, 'Описание мероприятия должно соответствовать данным в запросе');",
+							"    pm.expect(source.startDateTime).equal(target.startDateTime, 'Дата начала мероприятия должна соответствовать данным в запросе');",
+							"    pm.expect(source.endDateTime).equal(target.endDateTime, 'Дата окончания мероприятия должна соответствовать данным в запросе');",
+							"    pm.expect(Date.parse(response.createdDateTime)).equal(Date.parse(target.createdDateTime), 'Время создания мероприятия должно соответствовать сохранённому ранее');",
+							"    pm.expect(response.ownerId).equal(target.ownerId, 'Id создателя мероприятия должно соответствовать сохранённому ранее');",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const main = async () => {\r",
+							"    const api = new API(pm);\r",
+							"\r",
+							"    try {\r",
+							"        let eventResponse = await api.sendRequest(\"POST\", \r",
+							"                                                  \"/events\", \r",
+							"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+							"                                                  Utils.generateNewEventDto());\r",
+							"        let eventData = eventResponse.json();                                                  \r",
+							"        pm.variables.set('eventId', eventData.id);\r",
+							"        pm.variables.set(\"ownerId\", eventData.ownerId);\r",
+							"        pm.collectionVariables.set('response', eventData);\r",
+							"\r",
+							"        let updatedEvent = Utils.generateUpdatedEventDto();\r",
+							"\r",
+							"        pm.request.body.update({\r",
+							"            mode: 'raw',\r",
+							"            raw: updatedEvent,\r",
+							"            options: { raw: { language: 'json' } }\r",
+							"        });\r",
+							"        pm.variables.set(\"request_body\", updatedEvent);\r",
+							"    } catch(err) {\r",
+							"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+							"    }\r",
+							"};\r",
+							"\r",
+							"const interval = setInterval(() => {}, 1000);\r",
+							"\r",
+							"setTimeout(async () => \r",
+							"    {\r",
+							"        try {\r",
+							"            // выполняем наш скрипт\r",
+							"            await main();\r",
+							"        } catch (e) {\r",
+							"            console.error(e);\r",
+							"        } finally {\r",
+							"            clearInterval(interval);\r",
+							"        }\r",
+							"    },  \r",
+							"    100 \r",
+							");"
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -3431,13 +3594,13 @@
 						"value": "application/json"
 					},
 					{
-						"key": "ownerId",
-						"value": "test-owner"
+						"key": "X-User-Id",
+						"value": "{{ownerId}}"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"name\": \"Updated Event Name\",\n  \"location\": \"Updated Location\"\n}"
+					"raw": "{{request_body}}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/events/{{eventId}}",
@@ -3463,20 +3626,73 @@
 							"    pm.response.to.have.status(200);",
 							"});",
 							"",
+							"const size = pm.variables.get('size');",
+							"",
 							"pm.test(\"Response is an array\", function () {",
 							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData).to.be.an(\"array\");",
+							"    pm.expect(jsonData).to.not.be.empty;",
+							"    pm.expect(jsonData).length.to.be.above(1);",
+							"    pm.expect(jsonData).length.to.not.be.above(size);",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const main = async () => {\r",
+							"    const api = new API(pm);\r",
+							"\r",
+							"    try {\r",
+							"        let eventResponse = await api.sendRequest(\"POST\", \r",
+							"                                                  \"/events\", \r",
+							"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+							"                                                  Utils.generateNewEventDto());\r",
+							"        let eventData = eventResponse.json();                                                  \r",
+							"        pm.variables.set('eventId', eventData.id);\r",
+							"\r",
+							"        pm.variables.set('page', 1);\r",
+							"        pm.variables.set('size', 10);\r",
+							"    } catch(err) {\r",
+							"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+							"    }\r",
+							"};\r",
+							"\r",
+							"const interval = setInterval(() => {}, 1000);\r",
+							"\r",
+							"setTimeout(async () => \r",
+							"    {\r",
+							"        try {\r",
+							"            // выполняем наш скрипт\r",
+							"            await main();\r",
+							"        } catch (e) {\r",
+							"            console.error(e);\r",
+							"        } finally {\r",
+							"            clearInterval(interval);\r",
+							"        }\r",
+							"    },  \r",
+							"    100 \r",
+							");"
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
 				"url": {
-					"raw": "{{baseUrl}}/events?page=1&size=10",
+					"raw": "{{baseUrl}}/events?page={{page}}&size={{size}}",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -3486,11 +3702,11 @@
 					"query": [
 						{
 							"key": "page",
-							"value": "1"
+							"value": "{{page}}"
 						},
 						{
 							"key": "size",
-							"value": "10"
+							"value": "{{size}}"
 						}
 					]
 				}
@@ -3498,12 +3714,109 @@
 			"response": []
 		},
 		{
-			"name": "Get Events with Pagination without UserID",
+			"name": "Get Events with Pagination with UserID",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const main = async () => {\r",
+							"    const api = new API(pm);\r",
+							"\r",
+							"    try {\r",
+							"        const ownerId = _.random(2000, 2500);\r",
+							"        console.log(\"OWNERID \" + ownerId);\r",
+							"        pm.variables.set(\"ownerId\", ownerId);\r",
+							"        let eventResponse = await api.sendRequest(\"POST\", \r",
+							"                                                  \"/events\", \r",
+							"                                                  [{key: 'X-User-Id', value: ownerId}],\r",
+							"                                                  Utils.generateNewEventDto());\r",
+							"        let eventData = eventResponse.json();                                                  \r",
+							"        pm.variables.set('eventId', eventData.id);\r",
+							"        pm.variables.set('page', 0);\r",
+							"        pm.variables.set('size', 10);\r",
+							"        pm.collectionVariables.set('response', eventData);\r",
+							"    } catch(err) {\r",
+							"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+							"    }\r",
+							"};\r",
+							"\r",
+							"const interval = setInterval(() => {}, 1000);\r",
+							"\r",
+							"setTimeout(async () => \r",
+							"    {\r",
+							"        try {\r",
+							"            // выполняем наш скрипт\r",
+							"            await main();\r",
+							"        } catch (e) {\r",
+							"            console.error(e);\r",
+							"        } finally {\r",
+							"            clearInterval(interval);\r",
+							"        }\r",
+							"    },  \r",
+							"    100 \r",
+							");"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const source = pm.collectionVariables.get('response');\r",
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response is an array\", function () {\r",
+							"    pm.expect(jsonData).to.be.an(\"array\");\r",
+							"    pm.expect(jsonData).to.not.be.empty;\r",
+							"    pm.expect(jsonData.length).eq(1);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response have an object\", function () {\r",
+							"    pm.expect(jsonData[0].id).to.eql(source.id);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
 				"url": {
-					"raw": ""
+					"raw": "{{baseUrl}}/events?page={{page}}&size={{size}}&ownerId={{ownerId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"events"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "{{page}}"
+						},
+						{
+							"key": "size",
+							"value": "{{size}}"
+						},
+						{
+							"key": "ownerId",
+							"value": "{{ownerId}}"
+						}
+					]
 				}
 			},
 			"response": []
@@ -3515,15 +3828,81 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
 							"});",
 							"",
 							"pm.test(\"Response is empty\", function () {",
 							"    pm.expect(pm.response.text()).to.be.empty;",
-							"});"
+							"});",
+							"",
+							"let source = pm.collectionVariables.get('response');",
+							"",
+							"pm.test(\"Event must be found before deletion\", function () {",
+							"    pm.expect(source).not.to.be.null;",
+							"});",
+							"",
+							"let body",
+							"const req = {",
+							"                url: pm.collectionVariables.get(\"baseUrl\") + \"/events/\" + pm.variables.get(\"eventId\"),",
+							"                method: \"GET\",",
+							"                body: body == null ? \"\" : JSON.stringify(body),",
+							"                header: { \"Content-Type\": \"application/json\" },",
+							"                header: [{key: 'X-User-Id', value: pm.variables.get(\"ownerId\") }],",
+							"            };",
+							"pm.sendRequest(req, (error, response) => {",
+							"    pm.test(\"Event must be deleted after the request is completed\", function(){",
+							"         pm.expect(response.code).to.eql(404);",
+							"    });",
+							"})"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const main = async () => {\r",
+							"    const api = new API(pm);\r",
+							"\r",
+							"    try {\r",
+							"        let eventResponse = await api.sendRequest(\"POST\", \r",
+							"                                                  \"/events\", \r",
+							"                                                  [{key: 'X-User-Id', value: Utils.getNextUserId()}],\r",
+							"                                                  Utils.generateNewEventDto());\r",
+							"        let eventData = eventResponse.json(); \r",
+							"        let foundedEvent = await api.sendRequest(\"GET\", \r",
+							"                                                  \"/events/\" + eventData.id, \r",
+							"                                                  [{key: 'X-User-Id', value: eventData.ownerId}],\r",
+							"                                                  null);                                    \r",
+							"        pm.variables.set('eventId', eventData.id);\r",
+							"        pm.variables.set('ownerId', eventData.ownerId);\r",
+							"        pm.collectionVariables.set('response', foundedEvent);\r",
+							"    } catch(err) {\r",
+							"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+							"    }\r",
+							"};\r",
+							"\r",
+							"const interval = setInterval(() => {}, 1000);\r",
+							"\r",
+							"setTimeout(async () => \r",
+							"    {\r",
+							"        try {\r",
+							"            // выполняем наш скрипт\r",
+							"            await main();\r",
+							"        } catch (e) {\r",
+							"            console.error(e);\r",
+							"        } finally {\r",
+							"            clearInterval(interval);\r",
+							"        }\r",
+							"    },  \r",
+							"    100 \r",
+							");"
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -3531,8 +3910,8 @@
 				"method": "DELETE",
 				"header": [
 					{
-						"key": "ownerId",
-						"value": "test-owner"
+						"key": "X-User-Id",
+						"value": "{{ownerId}}"
 					}
 				],
 				"url": {
@@ -3635,6 +4014,22 @@
 					"        return newEventDto;\r",
 					"    }\r",
 					"\r",
+					"     static generateUpdatedEventDto() {\r",
+					"        const currentEventSuffix = Utils.getNextEventSuffix();\r",
+					"\r",
+					"        const now = new Date();\r",
+					"\r",
+					"        const newEventDto = {\r",
+					"            name: pm.variables.replaceIn('{{$randomLoremSentence}}').slice(1, 119) + currentEventSuffix,\r",
+					"            description: pm.variables.replaceIn('{{$randomLoremSentence}}').slice(1, 6999) + currentEventSuffix,\r",
+					"            startDateTime: Utils.getFormattedDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 4)),\r",
+					"            endDateTime: Utils.getFormattedDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5)),\r",
+					"            location: \"Updated Location\" + currentEventSuffix\r",
+					"        };\r",
+					"\r",
+					"        return newEventDto;\r",
+					"    }\r",
+					"\r",
 					"    static getNewOrgTeamMemberDto(eventId, userId, role) {\r",
 					"        const newOrgTeamMemberDto = {\r",
 					"            eventId: eventId,\r",
@@ -3673,17 +4068,21 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:8080"
+			"value": "http://localhost:8082"
 		},
 		{
 			"key": "nextEventSuffix",
 			"value": "1",
-			"type": "string"
+			"type": "number"
 		},
 		{
 			"key": "nextUserId",
 			"value": "1",
-			"type": "string"
+			"type": "number"
+		},
+		{
+			"key": "response",
+			"value": ""
 		}
 	]
 }
