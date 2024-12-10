@@ -1,7 +1,7 @@
 services:
   event-service:
     build: ./
-    image: event-service
+    image: ya-workshop-event-service
     container_name: event-service
     ports:
       - "8082:8080"
