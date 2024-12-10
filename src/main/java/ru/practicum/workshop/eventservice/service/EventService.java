@@ -13,7 +13,7 @@ public interface EventService {
 
     EventResponse getEvent(Long id, Long requesterId);
 
-    List<EventResponse> getEvents(int page, int size, Long requesterId, Long ownerId);
+    List<EventResponse> getEvents(int page, int size, Long ownerId);
 
     void deleteEvent(Long id, Long requesterId);
 

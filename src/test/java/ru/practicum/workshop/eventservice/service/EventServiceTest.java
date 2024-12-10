@@ -140,7 +140,7 @@ public class EventServiceTest {
         );
         EventResponse event2 = eventService.createEvent(anotherRequest, 2L);
 
-        List<EventResponse> events = eventService.getEvents(0, 2, 1L, 1L);
+        List<EventResponse> events = eventService.getEvents(0, 2, 1L);
 
         assertEquals(1, events.size());
         assertEquals(event1.getId(), events.get(0).getId());
