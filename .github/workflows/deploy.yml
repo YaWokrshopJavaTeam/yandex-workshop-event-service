@@ -39,7 +39,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.PRIVATE_KEY }}
-          source: "ya-workshop-event-service.tar,docker-compose.yml"
+          source: "ya-workshop-event-service.tar,docker-compose.yaml"
           target: ~/deploy/event-service/
 
       - name: Deploy on Server
