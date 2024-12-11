@@ -9,7 +9,7 @@ import ru.practicum.workshop.eventservice.model.OrgTeamMember;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface OrgTeamMemberMapper {
 
     @Mapping(target = "id", ignore = true)

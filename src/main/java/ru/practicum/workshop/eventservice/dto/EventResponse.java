@@ -1,5 +1,6 @@
 package ru.practicum.workshop.eventservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +21,6 @@ public class EventResponse {
     private LocalDateTime endDateTime;
     private String location;
     private Long ownerId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private LocalDateTime createdDateTime;
 }

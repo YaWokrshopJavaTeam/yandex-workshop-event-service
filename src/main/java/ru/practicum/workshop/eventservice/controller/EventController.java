@@ -1,6 +1,7 @@
 package ru.practicum.workshop.eventservice.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -43,11 +44,10 @@ public class EventController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<EventResponse> getEvents(@RequestParam @Positive int page,
+    public List<EventResponse> getEvents(@RequestParam @PositiveOrZero int page,
                                          @RequestParam @Positive int size,
-                                         @RequestHeader("X-User-Id") Long requesterId,
                                          @RequestParam(value = "ownerId", required = false) Long ownerId) {
-        return eventService.getEvents(page, size, requesterId, ownerId);
+        return eventService.getEvents(page, size, ownerId);
     }
 
     @DeleteMapping("/{id}")
