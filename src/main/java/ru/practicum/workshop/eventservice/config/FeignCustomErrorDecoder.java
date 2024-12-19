@@ -3,10 +3,8 @@ package ru.practicum.workshop.eventservice.config;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.extern.slf4j.Slf4j;
 import ru.practicum.workshop.eventservice.error.BadRequest;
 
-@Slf4j
 public class FeignCustomErrorDecoder implements ErrorDecoder {
     @Override
     public Exception decode(String s, Response response) {
