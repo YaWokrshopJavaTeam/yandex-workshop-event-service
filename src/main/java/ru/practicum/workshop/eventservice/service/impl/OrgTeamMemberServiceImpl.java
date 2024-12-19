@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.workshop.eventservice.client.UserClient;
 import ru.practicum.workshop.eventservice.dto.NewOrgTeamMemberDto;
 import ru.practicum.workshop.eventservice.dto.PublicOrgTeamMemberDto;
 import ru.practicum.workshop.eventservice.dto.UpdateOrgTeamMemberDto;
@@ -22,12 +23,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class OrgTeamMemberServiceImpl implements OrgTeamMemberService {
-
     private final EventService eventService;
-
     private final OrgTeamMemberRepository orgTeamMemberRepository;
-
     private final OrgTeamMemberMapper orgTeamMemberMapper;
+    private final UserClient userClient;
 
     @Override
     @Transactional
@@ -36,6 +35,7 @@ public class OrgTeamMemberServiceImpl implements OrgTeamMemberService {
 
         checkRightsForOrgTeamModification(requesterId, event);
 
+        userClient.getUserById(newOrgTeamMemberDto.getUserId());
         if (newOrgTeamMemberDto.getUserId().equals(event.getOwnerId())) {
             throw new ForbiddenException(String.format("Can't change role for event(id=%d) owner(id=%d)",
                     event.getId(), event.getOwnerId()));

@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.workshop.eventservice.client.UserClient;
 import ru.practicum.workshop.eventservice.dto.EventRequest;
 import ru.practicum.workshop.eventservice.dto.EventResponse;
 import ru.practicum.workshop.eventservice.error.ForbiddenException;
@@ -25,9 +26,20 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
+    private final UserClient userClient;
+
+    private void checkUserForbidden(Long userId) {
+        log.info("Getting user from User Service by id={}", userId);
+        try {
+            userClient.getUserById(userId);
+        } catch (EntityNotFoundException ex) {
+            throw new ForbiddenException("You can't create an event. Please log in to your account");
+        }
+    }
 
     @Override
     public EventResponse createEvent(EventRequest request, Long requesterId) {
+        checkUserForbidden(requesterId);
         Event event = eventMapper.toCreatingModel(request, requesterId);
         Event savedEvent = eventRepository.save(event);
 
