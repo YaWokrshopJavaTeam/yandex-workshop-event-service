@@ -11,9 +11,9 @@ import java.io.IOException;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class UserMock {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static void setupMockGetUserById(WireMockServer mockService, Long userId, UserDto userDto) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
         mockService.stubFor(get(urlEqualTo("/users/" + userId))
                 .willReturn(
                         aResponse()
