@@ -38,7 +38,7 @@ public class EventController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public EventResponse getEvent(@PathVariable Long id,
-                                  @RequestHeader(value = "X-User-Id") Long requesterId) {
+                                  @RequestHeader(value = "X-User-Id", required = false) Long requesterId) {
         return eventService.getEvent(id, requesterId);
     }
 

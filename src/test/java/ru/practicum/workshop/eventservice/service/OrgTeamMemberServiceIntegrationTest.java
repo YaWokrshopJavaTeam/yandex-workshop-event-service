@@ -3,11 +3,14 @@ package ru.practicum.workshop.eventservice.service;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import ru.practicum.workshop.eventservice.dto.*;
 import ru.practicum.workshop.eventservice.error.ForbiddenException;
 import ru.practicum.workshop.eventservice.model.OrgTeamMember;
@@ -30,6 +33,7 @@ import static ru.practicum.workshop.eventservice.UserMock.setupMockGetUserById;
 @ActiveProfiles("test")
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
 public class OrgTeamMemberServiceIntegrationTest {
 
     private final OrgTeamMemberServiceImpl orgTeamMemberService;
@@ -45,9 +49,15 @@ public class OrgTeamMemberServiceIntegrationTest {
 
     @BeforeAll
     static void beforeAll() {
-        mockUserServer = new WireMockServer(8081);
-        configureFor("localhost", 8081);
+        mockUserServer = new WireMockServer();
         mockUserServer.start();
+        log.info("Mock-server started on port {}.", mockUserServer.port());
+        configureFor("localhost", mockUserServer.port());
+    }
+
+    @DynamicPropertySource
+    static void setUserServiceUrl(DynamicPropertyRegistry registry) {
+        registry.add("userservice.url", () -> "localhost:" + mockUserServer.port() + "/users");
     }
 
     @BeforeEach
