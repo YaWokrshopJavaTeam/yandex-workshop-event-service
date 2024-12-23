@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import ru.practicum.workshop.eventservice.config.UserFeignConfiguration;
 import ru.practicum.workshop.eventservice.dto.UserDto;
 
-@FeignClient(value = "userClient", url = "${userservice.url}", configuration = UserFeignConfiguration.class)
+@FeignClient(value = "userClient", url = "${userservice.url}", path = "/users", configuration = UserFeignConfiguration.class)
 public interface UserClient {
     @GetMapping("/{userId}")
     UserDto getUserById(@PathVariable(value = "userId") long userId);
