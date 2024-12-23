@@ -2,6 +2,7 @@ package ru.practicum.workshop.eventservice.service;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.workshop.eventservice.dto.EventRequest;
 import ru.practicum.workshop.eventservice.dto.EventResponse;
@@ -29,6 +32,7 @@ import static ru.practicum.workshop.eventservice.UserMock.setupMockGetUserById;
 @SpringBootTest
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
 public class EventServiceTest {
 
     private final EventService eventService;
@@ -58,10 +62,23 @@ public class EventServiceTest {
 
     @BeforeAll
     static void beforeAll() {
+        mockUserServer = new WireMockServer();
+        mockUserServer.start();
+        log.info("Mock-server started on port {}.", mockUserServer.port());
+        configureFor("localhost", mockUserServer.port());
+    }
+
+    @DynamicPropertySource
+    static void setUserServiceUrl(DynamicPropertyRegistry registry) {
+        registry.add("userservice.url", () -> "localhost:" + mockUserServer.port() + "/users");
+    }
+
+    /*@BeforeAll
+    static void beforeAll() {
         mockUserServer = new WireMockServer(8081);
         configureFor("localhost", 8081);
         mockUserServer.start();
-    }
+    }*/
 
     private UserDto createUserDto(Long userId) {
         return UserDto.builder()
