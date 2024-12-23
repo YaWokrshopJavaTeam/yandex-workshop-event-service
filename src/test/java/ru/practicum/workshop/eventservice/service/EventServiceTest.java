@@ -1,6 +1,7 @@
 package ru.practicum.workshop.eventservice.service;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
@@ -62,7 +63,7 @@ public class EventServiceTest {
 
     @BeforeAll
     static void beforeAll() {
-        mockUserServer = new WireMockServer();
+        mockUserServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
         mockUserServer.start();
         log.info("Mock-server started on port {}.", mockUserServer.port());
         configureFor("localhost", mockUserServer.port());
@@ -70,15 +71,8 @@ public class EventServiceTest {
 
     @DynamicPropertySource
     static void setUserServiceUrl(DynamicPropertyRegistry registry) {
-        registry.add("userservice.url", () -> "localhost:" + mockUserServer.port() + "/users");
+        registry.add("userservice.url", () -> "localhost:" + mockUserServer.port());
     }
-
-    /*@BeforeAll
-    static void beforeAll() {
-        mockUserServer = new WireMockServer(8081);
-        configureFor("localhost", 8081);
-        mockUserServer.start();
-    }*/
 
     private UserDto createUserDto(Long userId) {
         return UserDto.builder()
