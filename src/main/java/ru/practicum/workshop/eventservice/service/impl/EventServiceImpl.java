@@ -3,8 +3,6 @@ package ru.practicum.workshop.eventservice.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.workshop.eventservice.client.UserClient;
@@ -13,6 +11,7 @@ import ru.practicum.workshop.eventservice.dto.EventResponse;
 import ru.practicum.workshop.eventservice.error.ForbiddenException;
 import ru.practicum.workshop.eventservice.error.NotFoundException;
 import ru.practicum.workshop.eventservice.mapper.EventMapper;
+import ru.practicum.workshop.eventservice.params.EventSearchParam;
 import ru.practicum.workshop.eventservice.repository.EventRepository;
 import ru.practicum.workshop.eventservice.service.EventService;
 import ru.practicum.workshop.eventservice.model.Event;
@@ -73,15 +72,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventResponse> getEvents(int page, int size, Long ownerId) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdDateTime");
-        PageRequest pageRequest = PageRequest.of(page, size, sort);
-        List<Event> events;
-        if (ownerId != null) {
-            events = eventRepository.findByOwnerId(ownerId, pageRequest).getContent();
-        } else {
-            events = eventRepository.findAll(pageRequest).getContent();
-        }
+    public List<EventResponse> getEvents(EventSearchParam param) {
+        List<Event> events = eventRepository.getEvents(param);
         return eventMapper.toEventsDtoPublic(events);
     }
 

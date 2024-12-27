@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import ru.practicum.workshop.eventservice.dto.UserDto;
+import ru.practicum.workshop.eventservice.client.dto.UserDto;
 
 import java.io.IOException;
 
