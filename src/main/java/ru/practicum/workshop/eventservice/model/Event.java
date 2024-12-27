@@ -43,4 +43,14 @@ public class Event {
 
     @OneToMany(mappedBy = "event")
     private List<OrgTeamMember> organizingTeam;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "registration_status", nullable = false)
+    private EventRegistrationStatus registrationStatus;
+
+    @Column(name = "is_limited", nullable = false)
+    private boolean isLimited;
+
+    @Column(name = "participant_limit")
+    private Integer participantLimit;
 }

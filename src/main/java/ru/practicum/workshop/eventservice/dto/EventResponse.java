@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.workshop.eventservice.model.EventRegistrationStatus;
 
 
 import java.time.LocalDateTime;
@@ -23,4 +24,8 @@ public class EventResponse {
     private Long ownerId;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private LocalDateTime createdDateTime;
+    private EventRegistrationStatus registrationStatus;
+    private boolean isLimited;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer participantLimit;
 }

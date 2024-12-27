@@ -1,4 +1,4 @@
-package ru.practicum.workshop.eventservice.dto;
+package ru.practicum.workshop.eventservice.client.dto;
 
 import lombok.*;
 

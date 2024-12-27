@@ -3,6 +3,7 @@ package ru.practicum.workshop.eventservice.service;
 import ru.practicum.workshop.eventservice.dto.EventRequest;
 import ru.practicum.workshop.eventservice.dto.EventResponse;
 import ru.practicum.workshop.eventservice.model.Event;
+import ru.practicum.workshop.eventservice.params.EventSearchParam;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface EventService {
 
     EventResponse getEvent(Long id, Long requesterId);
 
-    List<EventResponse> getEvents(int page, int size, Long ownerId);
+    List<EventResponse> getEvents(EventSearchParam param);
 
     void deleteEvent(Long id, Long requesterId);
 

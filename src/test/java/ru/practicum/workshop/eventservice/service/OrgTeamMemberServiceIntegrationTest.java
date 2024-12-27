@@ -12,8 +12,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import ru.practicum.workshop.eventservice.client.dto.UserDto;
 import ru.practicum.workshop.eventservice.dto.*;
 import ru.practicum.workshop.eventservice.error.ForbiddenException;
+import ru.practicum.workshop.eventservice.model.EventRegistrationStatus;
 import ru.practicum.workshop.eventservice.model.OrgTeamMember;
 import ru.practicum.workshop.eventservice.repository.EventRepository;
 import ru.practicum.workshop.eventservice.repository.OrgTeamMemberRepository;
@@ -466,6 +468,7 @@ public class OrgTeamMemberServiceIntegrationTest {
                 .location("Location1" + currentEventSuffix)
                 .startDateTime(LocalDateTime.now().plusDays(1))
                 .endDateTime(LocalDateTime.now().plusDays(2))
+                .registrationStatus(EventRegistrationStatus.OPEN)
                 .build();
     }
 

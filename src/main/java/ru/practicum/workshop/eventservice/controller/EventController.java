@@ -3,11 +3,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import ru.practicum.workshop.eventservice.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.workshop.eventservice.model.EventRegistrationStatus;
+import ru.practicum.workshop.eventservice.params.EventSearchParam;
 import ru.practicum.workshop.eventservice.service.EventService;
 import java.util.List;
 
@@ -44,10 +48,18 @@ public class EventController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<EventResponse> getEvents(@RequestParam @PositiveOrZero int page,
-                                         @RequestParam @Positive int size,
-                                         @RequestParam(value = "ownerId", required = false) Long ownerId) {
-        return eventService.getEvents(page, size, ownerId);
+    public List<EventResponse> getEvents(@RequestParam(required = false, defaultValue = "0") @PositiveOrZero int page,
+                                         @RequestParam(required = false, defaultValue = "10") @Positive int size,
+                                         @RequestParam(value = "ownerId", required = false) Long ownerId,
+                                         @RequestParam(value = "status", required = false)
+                                             EventRegistrationStatus status) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdDateTime");
+        EventSearchParam param = EventSearchParam.builder()
+                .pageable(PageRequest.of(page, size, sort))
+                .ownerId(ownerId)
+                .status(status)
+                .build();
+        return eventService.getEvents(param);
     }
 
     @DeleteMapping("/{id}")

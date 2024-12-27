@@ -10,10 +10,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.workshop.eventservice.dto.EventRequest;
 import ru.practicum.workshop.eventservice.dto.EventResponse;
+import ru.practicum.workshop.eventservice.model.EventRegistrationStatus;
+import ru.practicum.workshop.eventservice.params.EventSearchParam;
 import ru.practicum.workshop.eventservice.service.EventService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,7 +46,10 @@ public class EventControllerTest {
                 "Description",
                 startDateTime,
                 endDateTime,
-                "Online"
+                "Online",
+                EventRegistrationStatus.OPEN,
+                false,
+                null
         );
 
         EventResponse response = new EventResponse(
@@ -49,10 +58,13 @@ public class EventControllerTest {
                 "Description",
                 startDateTime,
                 endDateTime,
-                "Online", 1L, LocalDateTime.now()
+                "Online", 1L, LocalDateTime.now(),
+                EventRegistrationStatus.OPEN,
+                false,
+                null
         );
 
-        Mockito.when(eventService.createEvent(Mockito.any(EventRequest.class), Mockito.anyLong())).thenReturn(response);
+        Mockito.when(eventService.createEvent(any(EventRequest.class), anyLong())).thenReturn(response);
 
         mockMvc.perform(post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -73,16 +85,20 @@ public class EventControllerTest {
                 "Updated Description",
                 startDateTime,
                 endDateTime,
-                "New Location"
+                "New Location",
+                EventRegistrationStatus.OPEN,
+                false,
+                null
         );
 
         EventResponse updateResponse = new EventResponse(1L, "Updated Event",
                 "Updated Description",
                 startDateTime,
                 endDateTime,
-                "New Location",1L, LocalDateTime.of(2024, 12, 2, 10, 0));
+                "New Location",1L, LocalDateTime.of(2024, 12, 2, 10, 0),
+                EventRegistrationStatus.OPEN, false, null);
 
-        Mockito.when(eventService.updateEvent(Mockito.anyLong(), Mockito.any(EventRequest.class), Mockito.anyLong()))
+        Mockito.when(eventService.updateEvent(anyLong(), any(EventRequest.class), anyLong()))
                 .thenReturn(updateResponse);
 
         mockMvc.perform(patch("/events/1")
@@ -102,7 +118,10 @@ public class EventControllerTest {
                 LocalDateTime.of(2024, 12, 1, 12, 0),
                 "Online",
                 1L,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                EventRegistrationStatus.OPEN,
+                false,
+                null
         );
 
         Mockito.when(eventService.getEvent(1L, 1L)).thenReturn(response);
@@ -112,6 +131,35 @@ public class EventControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Test Event"))
                 .andExpect(jsonPath("$.createdDateTime").exists());
+    }
+
+    @Test
+    void testGetEvents() throws Exception {
+        EventResponse event1 = new EventResponse(
+                1L,
+                "Test Event",
+                "Description",
+                LocalDateTime.of(2024, 12, 1, 10, 0),
+                LocalDateTime.of(2024, 12, 1, 12, 0),
+                "Online",
+                1L,
+                LocalDateTime.now(),
+                EventRegistrationStatus.OPEN,
+                false,
+                null
+        );
+        List<EventResponse> response = new ArrayList<>(List.of(event1));
+
+        Mockito.when(eventService.getEvents(any(EventSearchParam.class))).thenReturn(response);
+
+        mockMvc.perform(get("/events")
+                        .param("page", String.valueOf(0))
+                        .param("size", String.valueOf(2))
+                        .param("ownerId", String.valueOf(1L))
+                        .param("status", EventRegistrationStatus.OPEN.toString())
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(".name").value("Test Event"));
     }
 
     @Test
@@ -130,7 +178,10 @@ public class EventControllerTest {
                 "Description",
                 LocalDateTime.of(2024, 12, 1, 10, 0),
                 LocalDateTime.of(2024, 12, 1, 12, 0),
-                "Online"
+                "Online",
+                EventRegistrationStatus.OPEN,
+                false,
+                null
         );
 
         mockMvc.perform(post("/events").header("X-User-Id", 1L)
@@ -146,7 +197,10 @@ public class EventControllerTest {
                 "Description",
                 LocalDateTime.of(2024, 12, 1, 12, 0),
                 LocalDateTime.of(2024, 12, 1, 10, 0),
-                "Online"
+                "Online",
+                EventRegistrationStatus.OPEN,
+                false,
+                null
         );
 
         mockMvc.perform(post("/events")
@@ -162,6 +216,9 @@ public class EventControllerTest {
                 "Description",
                 LocalDateTime.of(2024, 12, 1, 10, 0),
                 LocalDateTime.of(2024, 12, 1, 12, 0),
+                null,
+                EventRegistrationStatus.OPEN,
+                false,
                 null
         );
 
@@ -178,7 +235,10 @@ public class EventControllerTest {
                 "Description",
                 null,
                 LocalDateTime.of(2024, 12, 1, 12, 0),
-                "Online"
+                "Online",
+                EventRegistrationStatus.OPEN,
+                false,
+                null
         );
 
         mockMvc.perform(post("/events")
@@ -194,10 +254,51 @@ public class EventControllerTest {
                 "Description",
                 LocalDateTime.of(2024, 12, 1, 10, 0),
                 null,
-                "Online"
+                "Online",
+                EventRegistrationStatus.OPEN,
+                false,
+                null
         );
 
         mockMvc.perform(post("/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void whenCreateEvent_IsLimitNullParticipant_thenReturns400() throws Exception {
+        EventRequest invalidRequest = new EventRequest(
+                "Event",
+                "Description",
+                LocalDateTime.now().plusHours(2),
+                LocalDateTime.now().plusDays(2),
+                "Online",
+                EventRegistrationStatus.OPEN,
+                true,
+                null
+        );
+
+        mockMvc.perform(post("/events").header("X-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void whenCreateEvent_IsNotLimitParticipantNotNull_thenReturns400() throws Exception {
+        EventRequest invalidRequest = new EventRequest(
+                "Event",
+                "Description",
+                LocalDateTime.now().plusHours(2),
+                LocalDateTime.now().plusDays(2),
+                "Online",
+                EventRegistrationStatus.OPEN,
+                false,
+                0
+        );
+
+        mockMvc.perform(post("/events").header("X-User-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
